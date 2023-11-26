@@ -1,9 +1,47 @@
 ﻿@page "/learnblazor/bindprop"
+@using Tangy_Models.LearnBlazorModels
 
 <PageTitle>Bind Properties</PageTitle>
 
-<h3>Bind Properties</h3>
+<h3>Product</h3>
+<table class="table table-bordered border-dark">
+    <thead>
+        <tr class="bg-dark text-light">
+            <th>Name</th>
+            <th>Price</th>
+            <th>Active</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@product.Name</td>
+            <td>@product.Price</td>
+            <td>@(product.IsActive ? "Yes" : "No")</td>
+        </tr>
+    </tbody>    
+</table>
+
+<p>This Product is: @(product.IsActive ? "Active" : "Inactive")</p>
+
+<div>
+    <label for="active" class="form-label">Active</label>
+    <input type="checkbox" @bind-value="product.IsActive" @bind-value:event="onchange" checked="@product.IsActive" class="form-check-inline" />
+</div>
+
+
+<div class="mt-4">
+    <label for="price" class="form-label">Price</label>
+    <input type="number" id="price" name="price" class="form-control" @bind-value="product.Price" @bind-value:event="oninput" />
+    @* <input type="number" id="price" name="price" class="form-control" @bind="product.Price" @bind:event="oninput" /> *@
+</div>
+
 
 @code {
-
+    Demo_Product product = new ()
+        {
+            Id = 1,
+            Name = "Rose Candle",
+            Price = 15.95,
+            IsActive = true
+        };
 }
