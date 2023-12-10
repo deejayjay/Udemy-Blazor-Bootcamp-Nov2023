@@ -12,6 +12,17 @@
                 <label for="@($"addToFav_{Product.Id}")" class="form-check-label fw-bold">Add to Favorites</label>
             </div>
             <p><strong>Name:</strong> @Product.Name</p>
+            <div>
+                <span class="fw-bold">RF from parent: </span>
+                @if (FirstFragment is not null)
+                {
+                    <span class="mx-1">@FirstFragment</span>
+                }
+                @if (SecondFragment is not null)
+                {
+                    <span class="mx-1">@SecondFragment</span>
+                }
+            </div>
             <div class="form-check form-check-inline">
                 <label for="props" class="form-check-label fw-bold">Show Properties:</label>
                 <input type="checkbox" name="props" id="props" class="form-check-input" @bind-value="Product.IsActive" checked="@Product.IsActive" />
@@ -39,6 +50,10 @@
     public EventCallback<bool> OnFavoriteUpdated { get; set; }
     [Parameter]
     public EventCallback<string> OnProductSelected { get; set; }
+    [Parameter]
+    public RenderFragment? FirstFragment { get; set; }
+    [Parameter]
+    public RenderFragment? SecondFragment { get; set; }
 
     private async Task FavoriteUpdated(ChangeEventArgs e)
     {

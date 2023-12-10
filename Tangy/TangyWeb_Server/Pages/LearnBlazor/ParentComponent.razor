@@ -1,0 +1,33 @@
+﻿@page "/learnblazor/parentComponent"
+
+<h3>Parent Component</h3>
+
+<CascadingValue Value="@MessageForGrandChild" Name="Message">
+    <CascadingValue Value="@LuckyNumber" Name="LuckyNumber">
+        <_ChildComponent Title="This is the title passed as parameter from the parent component" OnButtonClick="ShowMessage">
+        <ChildContent>
+            Render fragment from parent component. Woo hoo!
+        </ChildContent>
+        <DangerChildContent>
+            Danger content from parent component. Woo hoo!
+        </DangerChildContent>
+    </_ChildComponent>
+    </CascadingValue>
+</CascadingValue>
+
+<p class="lead">@MessageText</p>
+
+@* <_ChildComponent Title="This is the second child component" /> *@
+<_AnotherChildComponent placeholder="Please enter your name" />
+
+
+@code {
+    private string MessageText { get; set; } = string.Empty;
+    private string MessageForGrandChild { get; set; } = "This message is from your grandparent (ParentComponent)";
+    private string LuckyNumber { get; set; } = "7";
+
+    protected void ShowMessage()
+    {
+        MessageText = "Tangy button clicked from Child component";
+    }
+}
