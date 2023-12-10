@@ -1,0 +1,12 @@
+﻿@if (IsActive)
+{
+    <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-success">Edit</button>
+        <button class="btn btn-danger">Delete</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+}

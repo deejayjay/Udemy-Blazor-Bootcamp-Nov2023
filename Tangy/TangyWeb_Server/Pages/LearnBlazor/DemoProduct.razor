@@ -2,41 +2,20 @@
 
 <div class="row">
     <h2 class="text-primary">Demo Product</h2>
-    @foreach(var prod in products)
+    <p class="lead">Number of Favorites: @FavortiesCount</p>
+    <p class="lead">Last selected product: @LastSelectedProduct</p>
+    @foreach (var prod in products)
     {
-        <div class="col-6">
-            <div class="border shadow-sm p-3 h-100 d-flex flex-column">
-                <div class="flex-fill">
-                    <h3>Product @prod.Id</h3>
-                    <hr />
-                    <p><strong>Name:</strong> @prod.Name</p>
-                    <div>
-                        <label for="props" class="form-label fw-bold">Show Properties:</label>
-                        <input type="checkbox" name="props" class="form-check-inline" @bind-value="prod.IsActive" checked="@prod.IsActive" />
-                    </div>
-
-                    @if (prod.IsActive)
-                    {
-                        <ul>
-                            @foreach (var prop in prod.ProductProperties)
-                            {
-                                <li><strong>@prop.Key: </strong>@prop.Value</li>
-                            }
-                        </ul>
-                    }
-                </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <button class="btn btn-success">Edit</button>
-                    <button class="btn btn-danger">Delete</button>
-                </div>
-            </div>
-        </div>
+        <_IndividualProduct Product="@prod"
+                            OnFavoriteUpdated="FavoriteCountUpdate"
+                            OnProductSelected="UpdateLastSelectedProduct" />
     }
 </div>
 
 @code {
     List<Demo_Product> products = new();
+    private int FavortiesCount { get; set; } = 0;
+    private string LastSelectedProduct { get; set; } = string.Empty;
 
     protected override void OnInitialized()
     {
@@ -67,5 +46,16 @@
                     new Demo_ProductProp {Id = 3,Key = "Color",Value = "White"}
                 }
             });
+    }
+
+    // Increment count if selected, decrement if unselected
+    protected void FavoriteCountUpdate(bool isSelected)
+    {
+        FavortiesCount = isSelected ? FavortiesCount + 1 : FavortiesCount - 1;
+    }
+
+    protected void UpdateLastSelectedProduct(string name)
+    {
+        LastSelectedProduct = name;
     }
 }

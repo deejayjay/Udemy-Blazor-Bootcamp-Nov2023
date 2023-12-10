@@ -1,0 +1,54 @@
+﻿<div class="col-6">
+    <div class="border shadow-sm p-3 h-100 d-flex flex-column" @onclick="(args) => ProductSelected(args, Product.Name)">
+        <div class="flex-fill">
+            <h3>Product @Product.Id</h3>
+            <hr />
+            <div class="form-check form-check-inline mb-3">
+                <input type="checkbox"
+                       id="@($"addToFav_{Product.Id}")"
+                       name="@($"addToFav_{Product.Id}")"
+                       class="form-check-input"
+                       @onchange="FavoriteUpdated" />
+                <label for="@($"addToFav_{Product.Id}")" class="form-check-label fw-bold">Add to Favorites</label>
+            </div>
+            <p><strong>Name:</strong> @Product.Name</p>
+            <div class="form-check form-check-inline">
+                <label for="props" class="form-check-label fw-bold">Show Properties:</label>
+                <input type="checkbox" name="props" id="props" class="form-check-input" @bind-value="Product.IsActive" checked="@Product.IsActive" />
+            </div>
+
+            @if (Product.IsActive)
+            {
+                <ul>
+                    @foreach (var prop in Product.ProductProperties)
+                    {
+                        <li><strong>@prop.Key: </strong>@prop.Value</li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <_EditDeleteButton IsActive="@Product.IsActive" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Demo_Product Product { get; set; } = new();
+    [Parameter]
+    public EventCallback<bool> OnFavoriteUpdated { get; set; }
+    [Parameter]
+    public EventCallback<string> OnProductSelected { get; set; }
+
+    private async Task FavoriteUpdated(ChangeEventArgs e)
+    {
+        var isChecked = e.Value is not null ? (bool)e.Value : false;
+
+        await OnFavoriteUpdated.InvokeAsync(isChecked);
+    }
+
+    private async Task ProductSelected(MouseEventArgs _, string name)
+    {
+        await OnProductSelected.InvokeAsync(name);
+    }
+}
