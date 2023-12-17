@@ -1,0 +1,49 @@
+﻿@page "/learnblazor/blazorjs"
+@inject IJSRuntime JSRuntime
+
+<h3>Blazor JS</h3>
+
+<div class="row align-items-center">
+    <div class="col-4">
+        <button type="button" class="btn btn-secondary w-100" @onclick="TestConfirm">Test Confirm Button</button>
+    </div>
+    <div class="col-8">
+        @if (IsConfirmed)
+        {
+            <div class="alert alert-success mb-0" role="alert">
+                Confirmed!
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger mb-0" role="alert">
+                Not Confirmed!
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row">
+    <button type="button" class="btn btn-success my-3" @onclick="ToastSuccess">Toastr Success</button>
+    <button type="button" class="btn btn-danger" @onclick="ToastFailure">Toastr Error</button>
+</div>
+
+@code {
+    private string _confirmMessage = "Are you sure you want to delete?";
+    public bool IsConfirmed { get; set; }
+
+    private async Task TestConfirm()
+    {
+        IsConfirmed = await JSRuntime.InvokeAsync<bool>("confirm", _confirmMessage);
+    }
+
+    private async Task ToastSuccess()
+    {
+        await JSRuntime.ToastrSuccess("Toaster works!!!");        
+    }
+
+    private async Task ToastFailure()
+    {
+        await JSRuntime.ToastrError("Toaster does not work...");        
+    }
+}
