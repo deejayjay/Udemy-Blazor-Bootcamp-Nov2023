@@ -1,4 +1,6 @@
-﻿<div>
+﻿@inject IJSRuntime JSRuntime
+
+<div>
     <div class="alert alert-info">@Title</div>
 
     <div class="alert alert-success">
@@ -34,4 +36,9 @@
 
     [Parameter]
     public EventCallback OnButtonClick { get; set; }
+
+    public async Task ToastSuccess()
+    {
+        await JSRuntime.ToastrSuccess("Toaster works!!!");
+    }
 }

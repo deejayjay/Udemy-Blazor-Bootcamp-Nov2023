@@ -3,29 +3,44 @@
 
 <h3>Blazor JS</h3>
 
-<div class="row align-items-center">
-    <div class="col-4">
+<div class="row mb-3">
+    <div class="col-12 col-md-6 col-lg-3">
         <button type="button" class="btn btn-secondary w-100" @onclick="TestConfirm">Test Confirm Button</button>
     </div>
-    <div class="col-8">
-        @if (IsConfirmed)
-        {
-            <div class="alert alert-success mb-0" role="alert">
-                Confirmed!
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-danger mb-0" role="alert">
-                Not Confirmed!
-            </div>
-        }
+    <div class="col"></div>
+</div>
+<div class="row">
+
+    @if (IsConfirmed)
+    {
+        <p class="alert alert-success" role="alert">
+            Confirmed!
+        </p>
+    }
+    else
+    {
+        <p class="alert alert-danger" role="alert">
+            Not Confirmed!
+        </p>
+    }
+</div>
+
+<div class="row mb-3">
+    <div class="col-12 col-md-6 col-lg-3">
+        <button type="button" class="btn btn-success w-100" @onclick="ToastSuccess">Toastr Success</button>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mt-3 mt-md-0">
+        <button type="button" class="btn btn-danger w-100" @onclick="ToastFailure">Toastr Error</button>
     </div>
 </div>
 
 <div class="row">
-    <button type="button" class="btn btn-success my-3" @onclick="ToastSuccess">Toastr Success</button>
-    <button type="button" class="btn btn-danger" @onclick="ToastFailure">Toastr Error</button>
+    <div class="col-12 col-md-6 col-lg-3">
+        <button type="button" class="btn btn-success w-100" @onclick="SweetAlertSuccess">SweetAlert Success</button>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mt-3 mt-md-0">
+        <button type="button" class="btn btn-danger w-100" @onclick="SweetAlertFailure">SweetAlert Failure</button>
+    </div>
 </div>
 
 @code {
@@ -39,11 +54,21 @@
 
     private async Task ToastSuccess()
     {
-        await JSRuntime.ToastrSuccess("Toaster works!!!");        
+        await JSRuntime.ToastrSuccess("Toaster works!!!");
     }
 
     private async Task ToastFailure()
     {
-        await JSRuntime.ToastrError("Toaster does not work...");        
+        await JSRuntime.ToastrError("Toaster does not work...");
+    }
+
+    private async Task SweetAlertSuccess()
+    {
+        await JSRuntime.InvokeVoidAsync("showSwal", "success", "Task completed successfully!");
+    }
+
+    private async Task SweetAlertFailure()
+    {
+        await JSRuntime.InvokeVoidAsync("showSwal", "error", "Task failed!");
     }
 }
