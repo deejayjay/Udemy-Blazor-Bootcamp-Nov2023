@@ -1,0 +1,111 @@
+﻿@page "/learnblazor/lifecycle"
+
+@using System.Threading
+
+<h3>Life-cycle</h3>
+<div class="mt-4 p-3 border">
+    @foreach (var item in EventTypes)
+    {
+        <p class="m-0">@item</p>
+        @if (item != EventTypes[^1])
+        {
+            <hr />
+        }
+    }
+</div>
+
+<div class="mt-4 p-3 border border-info">
+    <_LifeCycleChild CountValue="@_currentCount" />
+</div>
+
+<div class="my-4">
+    <p role="status" class="lead">Current count: @_currentCount</p>
+
+    <button class="btn btn-primary" @onclick="IncrementCount">Increment Count</button>
+
+    <p role="status" class="lead">Countdown: @Count</p>
+    <button class="btn btn-dark" @onclick="StartCountdown">Start Countdown</button>
+</div>
+
+@code {
+    private int _currentCount = 0;
+    List<string> EventTypes = new List<string>();
+    private int Count { get; set; } = 5;
+    private Timer? timer;
+
+    private void IncrementCount()
+    {
+        _currentCount++;
+    }
+
+    protected override void OnInitialized()
+    {
+        EventTypes.Add($"Parent: OnInitialized is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(() =>
+        {
+            EventTypes.Add($"Parent: OnInitializedAsync is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+        });
+    }
+
+    protected override void OnParametersSet()
+    {
+        EventTypes.Add($"Parent: OnParametersSet is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Run(() =>
+        {
+            EventTypes.Add($"Parent: OnParametersSetAsync is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+        });
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _currentCount = 111;
+        }
+        else
+        {
+            _currentCount = 999;
+        }
+        EventTypes.Add($"Parent: OnAfterRender is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await Task.Run(() =>
+        {
+            EventTypes.Add($"Parent: OnAfterRenderAsync is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+        });
+    }
+
+    protected override bool ShouldRender()
+    {
+        EventTypes.Add($"Parent: ShouldRender is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+        return true;
+    }
+
+    private void StartCountdown()
+    {
+        timer = new Timer(TimeCallback, null, 1000, 1000);
+
+    }
+
+    private void TimeCallback(object? state)
+    {
+        if (Count == 0)
+        {
+            timer?.Dispose();
+            return;
+        }
+
+        Count--;
+        InvokeAsync(StateHasChanged);
+    }
+}

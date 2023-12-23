@@ -1,0 +1,44 @@
+﻿<h3>Life-cycle Child</h3>
+<div class="mt-4 p-3 border">
+    @foreach (var item in EventTypes)
+    {
+        <p class="m-0">@item</p>
+        @if (item != EventTypes[^1])
+        {
+            <hr />
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int CountValue { get; set; }
+
+    List<string> EventTypes = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        EventTypes.Add($"Child: OnInitialized is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(() =>
+        {
+            EventTypes.Add($"Child: OnInitializedAsync is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+        });
+    }
+
+    protected override void OnParametersSet()
+    {
+        EventTypes.Add($"Child: OnParametersSet is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Run(() =>
+        {
+            EventTypes.Add($"Child: OnParametersSetAsync is called at {DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss.fffffff")}.");
+        });
+    }
+}
