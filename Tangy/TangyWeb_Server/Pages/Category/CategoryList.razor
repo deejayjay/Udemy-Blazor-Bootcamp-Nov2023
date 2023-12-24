@@ -1,0 +1,66 @@
+﻿@page "/category"
+
+@inject ICategoryRepository _categoryRepository
+
+<div class="row mt-4">
+    <div class="col-6">
+        <h4 class="card-title text-success">Category List</h4>
+    </div>
+    <div class="col-4 offset-2">
+        <a href="category/create" class="btn btn-success form-control">Add New Category</a>
+    </div>
+    <div class="col-12 mt-4">
+        @if(Categories.Count() > 0)
+        {
+            <table class="table table-bordered border-dark">
+                <thead>
+                    <tr class="bg-dark text-white">
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var category in Categories)
+                    {
+                        <tr>
+                            <td>@category.Name</td>
+                            <td>
+                                <NavLink href="@($"/category/edit/{category.Id}")" class="btn btn-sm btn-info">Edit</NavLink>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            if(IsLoading)
+            {
+                <_Loader />
+            }
+            else
+            {
+                <p class="text-center">No categories found</p>
+            }
+        }        
+    </div>
+</div>
+
+@code {
+    private IEnumerable<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
+    private bool IsLoading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategoriesAsync();
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        IsLoading = true;
+
+        Categories = await Task.Run(async () => await _categoryRepository.GetAllAsync());
+
+        IsLoading = false;
+    }
+}
