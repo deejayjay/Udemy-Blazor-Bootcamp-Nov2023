@@ -73,6 +73,12 @@ namespace Tangy_Business.Repository
             }
 
             objFromDb.Name = objDto.Name;
+            objFromDb.Description = objDto.Description;
+            objFromDb.IsShopFavorite = objDto.IsShopFavorite;
+            objFromDb.IsCustomerFavorite = objDto.IsCustomerFavorite;
+            objFromDb.Color = objDto.Color;
+            objFromDb.ImageUrl = objDto.ImageUrl;
+            objFromDb.CategoryId = objDto.CategoryId;
 
             _db.Products.Update(objFromDb);
             await _db.SaveChangesAsync();

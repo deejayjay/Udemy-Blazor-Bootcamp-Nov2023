@@ -3,6 +3,8 @@
 
 @inject IProductRepository _productRepository
 @inject ICategoryRepository _categoryRepository
+@inject IFileUploadService _fileUploadService
+@inject IJSRuntime _jsRuntime
 @inject NavigationManager _navigationManager
 
 <div class="row my-2">
@@ -24,7 +26,7 @@
                 </div>
                 <div class="form-group mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <InputTextArea id="description" @bind-Value="Product.Description" class="form-control" />
+                    <SfRichTextEditor id="description" @bind-Value="Product.Description" />
                     <ValidationMessage For="() => Product.Description" />
                 </div>
                 <div class="row py-2">
@@ -56,6 +58,10 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-group my-3">
+                    <label for="productImg" class="form-label">Upload Image</label>
+                    <InputFile id="productImg" OnChange="HandleImageUpload" accept=".jpg,.jpeg,.png,.webp" class="form-control" />
+                </div>
                 <div class="form-group">
                     <button class="btn btn-dark" type="submit">@ButtonText</button>
                     <NavLink href="/product" class="btn btn-secondary">Back to Products</NavLink>
@@ -67,17 +73,24 @@
             <_Loader />
         }
     </div>
+    <div class="col-md-2">
+        <img src="@Product.ImageUrl" alt="" class="w-100" />
+    </div>
 </div>
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
-    private ProductDto Product { get; set; } = new ProductDto();
+    private ProductDto Product { get; set; } = new()
+    {
+        ImageUrl = "images/default.png"
+    };
     private IEnumerable<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
     private string Title { get; set; } = "Create";
-    private bool IsLoading { get; set; }
     private string ButtonText => Product.Id == 0 ? "Create" : "Update";
+    private bool IsLoading { get; set; }
+    private string OldImageUrl { get; set; } = string.Empty;
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
@@ -104,6 +117,7 @@
             // Edit
             Title = "Edit";
             Product = await _productRepository.GetAsync(Id);
+            OldImageUrl = Product.ImageUrl;
         }
 
         IsLoading = false;
@@ -116,12 +130,54 @@
         if (Product.Id == 0)
         {
             await _productRepository.CreateAsync(Product);
+            await _jsRuntime.ToastrSuccess("Product created successfully");
         }
         // Update Product
         else
         {
+            if (OldImageUrl != Product.ImageUrl)
+            {
+                _fileUploadService.DeleteFile(OldImageUrl);
+            }
+
             await _productRepository.UpdateAsync(Product);
+            await _jsRuntime.ToastrSuccess("Product updated successfully");
         }
         _navigationManager.NavigateTo("/product");
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        IsLoading = true;
+
+        try
+        {
+            if (e.GetMultipleFiles().Count > 0)
+            {
+                foreach (var file in e.GetMultipleFiles())
+                {
+                    var fileInfo = new FileInfo(file.Name);
+                    string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+
+                    if (allowedExtensions.Any(ext => ext == fileInfo.Extension.ToLower()))
+                    {
+                        Product.ImageUrl = await _fileUploadService.UploadFileAsync(file);
+                    }
+                    else
+                    {
+                        await _jsRuntime.ToastrError("Invalid file type. File must be .jpg, .jpeg, .png, or .webp");
+                        break;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await _jsRuntime.ToastrError(ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 }
