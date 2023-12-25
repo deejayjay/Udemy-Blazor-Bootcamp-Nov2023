@@ -1,7 +1,9 @@
 ﻿@page "/category"
 
+@inject IJSRuntime _jsRuntime
 @inject ICategoryRepository _categoryRepository
 
+<_DeleteConfirmation OnDeleteConfirm="@HandleConfirmDelete" IsParentComponentProcessing="@IsLoading" />
 <div class="row mt-4">
     <div class="col-6">
         <h4 class="card-title text-success">Category List</h4>
@@ -10,7 +12,7 @@
         <a href="category/create" class="btn btn-success form-control">Add New Category</a>
     </div>
     <div class="col-12 mt-4">
-        @if(Categories.Count() > 0)
+        @if (Categories.Count() > 0)
         {
             <table class="table table-bordered border-dark">
                 <thead>
@@ -20,12 +22,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(var category in Categories)
+                    @foreach (var category in Categories)
                     {
                         <tr>
                             <td>@category.Name</td>
                             <td>
                                 <NavLink href="@($"/category/edit/{category.Id}")" class="btn btn-sm btn-info">Edit</NavLink>
+                                <button class="btn btn-sm btn-danger"
+                                        @onclick="() => ShowDeleteConfirmationModal(category.Id)">
+                                    Delete
+                                </button>
                             </td>
                         </tr>
                     }
@@ -34,7 +40,7 @@
         }
         else
         {
-            if(IsLoading)
+            if (IsLoading)
             {
                 <_Loader />
             }
@@ -42,25 +48,52 @@
             {
                 <p class="text-center">No categories found</p>
             }
-        }        
+        }
     </div>
 </div>
 
 @code {
     private IEnumerable<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
-    private bool IsLoading { get; set; } = true;
+    private bool IsLoading { get; set; }
+    private int DeleteCategoryId { get; set; } = 0;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadCategoriesAsync();
+        if(firstRender)
+        {
+            await LoadCategoriesAsync();               
+        }
     }
 
     private async Task LoadCategoriesAsync()
     {
         IsLoading = true;
+        StateHasChanged();
 
-        Categories = await Task.Run(async () => await _categoryRepository.GetAllAsync());
+        Categories = await _categoryRepository.GetAllAsync();
 
-        IsLoading = false;
+        IsLoading = false;        
+        StateHasChanged();
+    }
+
+    private async Task ShowDeleteConfirmationModal(int id)
+    {
+        DeleteCategoryId = id;
+        await _jsRuntime.InvokeVoidAsync("showDeleteConfirmationModal");
+    }
+
+    private async Task HandleConfirmDelete(bool isConfirmed)
+    {
+        if(isConfirmed && DeleteCategoryId != 0)
+        {
+            IsLoading = true;
+            
+            // Delete Category from the Database
+            await _categoryRepository.DeleteAsync(DeleteCategoryId);
+            await LoadCategoriesAsync();
+            await _jsRuntime.InvokeVoidAsync("hideDeleteConfirmationModal");
+
+            IsLoading = false;
+        }
     }
 }

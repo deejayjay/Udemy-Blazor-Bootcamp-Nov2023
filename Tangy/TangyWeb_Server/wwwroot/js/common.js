@@ -21,3 +21,11 @@ window.showSwal = (type, message) => {
         icon: alertIcon
     });
 };
+
+function showDeleteConfirmationModal() {
+    $("#deleteConfirmationModal").modal('show');
+}
+
+function hideDeleteConfirmationModal() {
+    $("#deleteConfirmationModal").modal('hide');
+}
