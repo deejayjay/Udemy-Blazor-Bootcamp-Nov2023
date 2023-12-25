@@ -11,6 +11,8 @@ namespace Tangy_Business.Mapper
             CreateMap<Category, CategoryDto>()
                 .ReverseMap()
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.Now));
+            CreateMap<Product, ProductDto>()
+                .ReverseMap();
         }
     }
 }
