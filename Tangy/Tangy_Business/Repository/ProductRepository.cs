@@ -46,6 +46,7 @@ namespace Tangy_Business.Repository
             return _mapper
                 .Map<IEnumerable<Product>, IEnumerable<ProductDto>>(await _db.Products
                                                                                 .Include(p => p.Category)
+                                                                                .Include(p => p.ProductPrices)
                                                                                 .ToListAsync());
         }
 
@@ -53,6 +54,7 @@ namespace Tangy_Business.Repository
         {
             var obj = await _db.Products
                                 .Include(p => p.Category)
+                                .Include(p => p.ProductPrices)
                                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (obj is null)
