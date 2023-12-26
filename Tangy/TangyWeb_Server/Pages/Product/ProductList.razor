@@ -38,7 +38,8 @@
                             </td>
                             <td>@product.Category.Name</td>
                             <td>
-                                <NavLink href="@($"/product/edit/{product.Id}")" class="btn btn-sm btn-info">Edit</NavLink>
+                                <NavLink href="@($"/product/edit/{product.Id}")" class="btn btn-sm btn-primary">Edit</NavLink>
+                                <NavLink href="@($"/product/price/{product.Id}")" class="btn btn-sm btn-dark">Price</NavLink>
                                 <button class="btn btn-sm btn-danger"
                                         @onclick="() => ShowDeleteConfirmationModal(product.Id)">
                                     Delete

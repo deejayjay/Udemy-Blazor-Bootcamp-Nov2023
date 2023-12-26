@@ -27,7 +27,7 @@
                         <tr>
                             <td>@category.Name</td>
                             <td>
-                                <NavLink href="@($"/category/edit/{category.Id}")" class="btn btn-sm btn-info">Edit</NavLink>
+                                <NavLink href="@($"/category/edit/{category.Id}")" class="btn btn-sm btn-primary">Edit</NavLink>
                                 <button class="btn btn-sm btn-danger"
                                         @onclick="() => ShowDeleteConfirmationModal(category.Id)">
                                     Delete
