@@ -26,7 +26,7 @@ var app = builder.Build();
 
 //Register Syncfusion license
 Syncfusion.Licensing.SyncfusionLicenseProvider
-    .RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NAaF5cWWJCf0x3WmFZfVpgcV9HZFZSRWY/P1ZhSXxQd0dhXH5ZcXBWR2JbVUQ=");
+    .RegisterLicense("MzAwNjIxMUAzMjM0MmUzMDJlMzBjcDE4OEU3QS9SWk9yQU9kTnE1dXhmNWl3NEk4dTE4RW5tcUpTMEpKZTkwPQ==");
 
 
 // Configure the HTTP request pipeline.
