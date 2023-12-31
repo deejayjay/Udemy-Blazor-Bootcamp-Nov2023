@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Tangy_DataAccess;
+using Tangy_DataAccess.ViewModel;
 using Tangy_Models;
 
 namespace Tangy_Business.Mapper
@@ -16,6 +17,15 @@ namespace Tangy_Business.Mapper
                 .ReverseMap();
 
             CreateMap<ProductPrice, ProductPriceDto>()
+                .ReverseMap();
+
+            CreateMap<OrderHeader, OrderHeaderDto>()
+                .ReverseMap();
+
+            CreateMap<OrderDetail, OrderDetailDto>()
+                .ReverseMap();
+
+            CreateMap<Order, OrderDto>()
                 .ReverseMap();
         }
     }
