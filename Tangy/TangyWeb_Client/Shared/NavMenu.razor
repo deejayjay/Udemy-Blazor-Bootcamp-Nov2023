@@ -1,4 +1,8 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+﻿@inject ISyncLocalStorageService _localStorageService;
+@inject ICartService _cartService;
+@implements IDisposable;
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">Tangy</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -7,8 +11,17 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item p-0">
-                    <NavLink class="nav-link" aria-current="page" href="/">
-                        <span class="p-2">Home</span>
+                    <NavLink class="nav-link" aria-current="page" href="/" Match="NavLinkMatch.All">
+                        <span class="p-1">Products</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item p-0">
+                    <NavLink class="nav-link" aria-current="page" href="/cart">
+                        <span class="p-1">
+                            <i class="bi bi-cart me-1"></i>
+                            Cart                            
+                            <span class="badge bg-info ms-2">@CartItemsCount</span>
+                        </span>
                     </NavLink>
                 </li>
             </ul>
@@ -24,19 +37,29 @@
                             <span class="p-2">Login</span>
                         </NavLink>
                     </li>
-                </ul>                
+                </ul>
             </form>
         </div>
     </div>
 </nav>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    protected override void OnInitialized()
     {
-        collapseNavMenu = !collapseNavMenu;
+        _cartService.OnChange += StateHasChanged;
     }
+
+    public void Dispose()
+    {
+        _cartService.OnChange -= StateHasChanged;
+    }
+
+    private int CartItemsCount
+    {
+        get
+        {
+            var cart = _localStorageService.GetItem<List<ShoppingCart>>(Sd.ShoppingCart);
+            return cart?.Count ?? 0;
+        }
+    }    
 }
