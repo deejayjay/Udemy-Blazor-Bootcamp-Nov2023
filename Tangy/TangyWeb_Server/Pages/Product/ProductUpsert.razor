@@ -1,4 +1,7 @@
-﻿@page "/product/create"
+﻿@* Prevents unauthorized users from accessing the page *@
+@attribute [Authorize(Roles = Sd.Role_Admin)]
+
+@page "/product/create"
 @page "/product/edit/{id:int}"
 
 @inject IProductRepository _productRepository

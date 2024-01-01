@@ -3,6 +3,7 @@
 @inject IProductRepository _productRepository
 @inject IFileUploadService _fileUploadService
 @inject IJSRuntime _jsRuntime
+@inject NavigationManager _navigationManager
 
 <_DeleteConfirmation OnDeleteConfirm="@HandleConfirmDelete" IsParentComponentProcessing="@IsLoading" />
 <div class="row mt-4">
@@ -68,6 +69,26 @@
     private IEnumerable<ProductDto> Products { get; set; } = new List<ProductDto>();
     private bool IsLoading { get; set; }
     private int DeleteProductId { get; set; } = 0;
+
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationState;
+
+        if (!authState.User.Identity.IsAuthenticated)
+        {
+            var currentUri = new Uri(_navigationManager.Uri);
+
+            _navigationManager.NavigateTo($"/identity/account/login?returnUrl={currentUri.LocalPath}", true);
+        }
+        else if (!authState.User.IsInRole(Sd.Role_Admin))
+        {
+            // Redirecting to Error Page if user is not in Admin role
+            _navigationManager.NavigateTo("/ErrorPage");
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

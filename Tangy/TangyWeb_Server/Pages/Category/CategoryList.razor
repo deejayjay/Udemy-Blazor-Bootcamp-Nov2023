@@ -1,4 +1,7 @@
-﻿@page "/category"
+﻿@* Prevents unauthorized users from accessing the page *@
+@attribute [Authorize(Roles = Sd.Role_Admin)]
+
+@page "/category"
 
 @inject IJSRuntime _jsRuntime
 @inject ICategoryRepository _categoryRepository

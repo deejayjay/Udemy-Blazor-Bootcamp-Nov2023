@@ -1,4 +1,7 @@
-﻿@page "/category/create"
+﻿@* Prevents unauthorized users from accessing the page *@
+@attribute [Authorize(Roles = Sd.Role_Admin)]
+
+@page "/category/create"
 @page "/category/edit/{id:int}"
 
 @inject ICategoryRepository _categoryRepository

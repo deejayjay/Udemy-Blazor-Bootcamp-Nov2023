@@ -1,4 +1,7 @@
-﻿@page "/product/price/{Id:int}"
+﻿@* Prevents unauthorized users from accessing the page *@
+@attribute [Authorize(Roles = Sd.Role_Admin)]
+
+@page "/product/price/{Id:int}"
 
 @using Syncfusion.Blazor.DropDowns
 @inject IProductRepository _productRepository

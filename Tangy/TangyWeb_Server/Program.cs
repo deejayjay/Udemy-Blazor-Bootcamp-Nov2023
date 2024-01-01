@@ -18,10 +18,15 @@ builder.Services.AddSyncfusionBlazor();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>()
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductPriceRepository, ProductPriceRepository>();
@@ -52,9 +57,22 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Seed the database
+await SeedDatabase();
+
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+
+
+async Task SeedDatabase()
+{
+    using var scope = app?.Services.CreateScope();
+
+    var dbInitializer = scope?.ServiceProvider.GetRequiredService<IDbInitializer>();
+    await dbInitializer?.Initialize();
+}
