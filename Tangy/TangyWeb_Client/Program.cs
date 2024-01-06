@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using TangyWeb_Client;
@@ -18,7 +19,12 @@ builder.Services.AddScoped(sp => new HttpClient
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-
 builder.Services.AddBlazoredLocalStorage();
+
+
+// Add authentication/authorization
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>(); // Custom implementation of AuthenticationStateProvider
 
 await builder.Build().RunAsync();

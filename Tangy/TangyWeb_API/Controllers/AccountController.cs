@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -50,32 +52,57 @@ namespace TangyWeb_API.Controllers
                 EmailConfirmed = true
             };
 
-            var result = await _userManager.CreateAsync(user, request.Password);
-
-            // User creation failed
-            if (!result.Succeeded)
+            try
             {
+                var result = await _userManager.CreateAsync(user, request.Password);
+
+                // User creation failed
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new SignUpResponseDto()
+                    {
+                        IsRegistrationSuccessful = false,
+                        Errors = result.Errors.Select(x => x.Description)
+                    });
+                }
+
+                // If user creation succeeded, assign role to user
+                var roleResult = await _userManager.AddToRoleAsync(user, Sd.Role_Customer);
+
+                // Role assignment failed
+                if (!roleResult.Succeeded)
+                {
+                    return BadRequest(new SignUpResponseDto()
+                    {
+                        IsRegistrationSuccessful = false,
+                        Errors = result.Errors.Select(x => x.Description)
+                    });
+                }
+
+                return StatusCode(201);
+            }
+            catch (DbUpdateException ex) when (IsDuplicateKeyViolation(ex))
+            {
+                // Add a custom error message to the result
+                var result = IdentityResult.Failed(new IdentityError
+                {
+                    Description = $"The username '{request.Email}' is already taken."
+                });
+
                 return BadRequest(new SignUpResponseDto()
                 {
                     IsRegistrationSuccessful = false,
                     Errors = result.Errors.Select(x => x.Description)
                 });
-            }
+            }            
+        }
 
-            // If user creation succeeded, assign role to user
-            var roleResult = await _userManager.AddToRoleAsync(user, Sd.Role_Customer);
-
-            // Role assignment failed
-            if (!roleResult.Succeeded)
-            {
-                return BadRequest(new SignUpResponseDto()
-                {
-                    IsRegistrationSuccessful = false,
-                    Errors = result.Errors.Select(x => x.Description)
-                });
-            }
-
-            return StatusCode(201);
+        // Helper method to check if the exception is a duplicate key violation
+        private bool IsDuplicateKeyViolation(DbUpdateException ex)
+        {
+            // Check if the exception is a SQL Server exception with error number 2601
+            return ex?.InnerException is SqlException sqlException &&
+                   sqlException.Number == 2601;
         }
 
         [HttpPost]
