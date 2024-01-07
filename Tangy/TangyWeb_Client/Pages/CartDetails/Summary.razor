@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Authorization
 
 @inject IProductService _productService
+@inject IOrderService _orderService
+@inject IPaymentService _paymentService
 @inject ILocalStorageService _localStorageService
 @inject IJSRuntime _jsRuntime
 
@@ -17,7 +19,6 @@
 else
 {
     <div class="mt-4 mx-4 px-md-5 mx-md-5 p-1">
-
         <div class="row p-2 my-3">
             <div class="col-12 col-lg-7 p-4">
                 <div class="row px-2 text-success ">
@@ -172,6 +173,28 @@ else
 
     private async Task HandleCheckout()
     {
+        IsProcessing = true;
 
+        try
+        {
+            var paymentDto = new StripePaymentDto
+                {
+                    Order = Order
+                };
+
+            var paymentResult = await _paymentService.Checkout(paymentDto);
+
+            Order.OrderHeader.SessionId = paymentResult.Data.ToString();
+
+            var orderDtoSaved = await _orderService.CreateAsync(paymentDto);
+
+            await _localStorageService.SetItemAsync<OrderDto>(Sd.Local_OrderDetails, orderDtoSaved);
+
+            await _jsRuntime.InvokeVoidAsync("redirectToCheckout", paymentResult.Data.ToString());
+        }
+        catch (Exception ex)
+        {
+            await _jsRuntime.ToastrError(ex.Message);
+        }        
     }
 }

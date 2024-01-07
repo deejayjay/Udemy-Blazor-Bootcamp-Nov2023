@@ -1,0 +1,66 @@
+﻿@page "/OrderConfirmation"
+
+@inject ILocalStorageService _localStorage
+@inject IOrderService _orderService
+
+<div class="container">
+    @if (IsProcessing)
+{
+    <div style="position:fixed;top:50%;left:50%;margin-top:-50px;margin-left:-100px;">
+        <img src="images/ajax-loader.gif" />
+        </div>
+    }
+    else
+    {
+        if(Order?.OrderHeader.Status == Sd.Status_Confirmed)
+        {
+            <div class="row mt-4 pt-4">
+                <div class="col-10 offset-1 text-center">
+                    <h2 class="text-info">Order Confirmed</h2>
+                    <p>Your order has been placed successfully with order id: <strong>@Order?.OrderHeader.Id</strong>.</p>
+                </div>
+                <div class="col-8 offset-2">
+                    <img src="/images/confirmation.jpg" alt="" class="w-100 img-thumbnail" />
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row mt-4 pt-4">
+                <div class="col-10 offset-1 text-center">
+                    <h2 class="text-danger">Order Issue!</h2>
+                    <p>There was an issue processing your order. Please contact support with order id: <strong>@Order?.OrderHeader.Id</strong>.</p>
+                </div>
+                <div class="col-8 offset-2">
+                    <img src="/images/confirmation.jpg" alt="" class="w-100 img-thumbnail" />
+                </div>
+            </div>
+        }
+
+    }
+</div>
+
+@code {
+    private bool IsProcessing { get; set; }
+    private OrderDto? Order { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsProcessing = true;
+
+        Order = await _localStorage.GetItemAsync<OrderDto>(Sd.Local_OrderDetails);
+        // Add logic to check payment and update status
+        var updatedOrder = await _orderService.MarkPaymentSuccessful(Order.OrderHeader);
+
+        if (updatedOrder.Status == Sd.Status_Confirmed)
+        {
+            Order.OrderHeader.Status = Sd.Status_Confirmed;
+
+            // Remote order details and shopping cart from local storage
+            await _localStorage.RemoveItemAsync(Sd.Local_OrderDetails);
+            await _localStorage.RemoveItemAsync(Sd.ShoppingCart);
+        }        
+
+        IsProcessing = false;
+    }
+}

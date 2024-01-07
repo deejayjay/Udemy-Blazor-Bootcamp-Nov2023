@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Text;
 using Tangy_Models;
 using TangyWeb_Client.Service.IService;
 
@@ -11,6 +12,22 @@ namespace TangyWeb_Client.Service
         public OrderService(HttpClient client)
         {
             _client = client;                   
+        }
+
+        public async Task<OrderDto> CreateAsync(StripePaymentDto paymentDto)
+        {
+            var content = JsonConvert.SerializeObject(paymentDto);
+            var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync("/api/order/create", bodyContent);
+            var responseResult = await response.Content.ReadAsStringAsync();
+
+            if(!response.IsSuccessStatusCode)
+            {
+                return new OrderDto();
+            }
+
+            var result = JsonConvert.DeserializeObject<OrderDto>(responseResult);
+            return result ?? new OrderDto();
         }
 
         public async Task<IEnumerable<OrderDto>> GetAllAsync(string? userId = null)
@@ -44,6 +61,23 @@ namespace TangyWeb_Client.Service
             var order = JsonConvert.DeserializeObject<OrderDto>(content);            
 
             return order ?? new OrderDto();
+        }
+
+        public async Task<OrderHeaderDto> MarkPaymentSuccessful(OrderHeaderDto orderHeader)
+        {
+            var content = JsonConvert.SerializeObject(orderHeader);
+            var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
+            var response = await _client.PostAsync("/api/order/paymentsuccessful", bodyContent);
+            var responseResult = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorModel = JsonConvert.DeserializeObject<ErrorModelDto>(responseResult);
+                throw new Exception(errorModel?.ErrorMessage);
+            }
+
+            var result = JsonConvert.DeserializeObject<OrderHeaderDto>(responseResult);
+            return result ?? new OrderHeaderDto();
         }
     }
 }
