@@ -1,8 +1,5 @@
 ﻿@page "/register"
 
-@inject IAuthenticationService _authService
-@inject NavigationManager _navigationManager
-
 <EditForm Model="@signUpRequest" OnValidSubmit="@RegisterUser" class="pt-4">
     <DataAnnotationsValidator />
     <div class="py-4">
@@ -61,32 +58,3 @@
         </div>
     </div>
 </EditForm>
-
-@code {
-    private SignUpRequestDto signUpRequest = new();
-    private bool _isProcessing;
-    private bool ShowRegistrationErrors { get; set; }
-    private IEnumerable<string> Errors { get; set; } = new List<string>();
-
-    private async Task RegisterUser()
-    {
-        ShowRegistrationErrors = false;
-        _isProcessing = true;
-
-        var result = await _authService.RegisterUserAsync(signUpRequest);
-
-        if (result.IsRegistrationSuccessful)
-        {
-            // Registration successful, redirect to home page
-            _navigationManager.NavigateTo("/login");
-        }
-        else
-        {
-            // Registration failed, display errors
-            Errors = result.Errors;
-            ShowRegistrationErrors = true;
-        }
-
-        _isProcessing = false;
-    }
-}

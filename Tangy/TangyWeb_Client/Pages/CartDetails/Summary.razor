@@ -1,8 +1,12 @@
 ﻿@page "/summary"
 
+@using Microsoft.AspNetCore.Authorization
+
 @inject IProductService _productService
 @inject ILocalStorageService _localStorageService
 @inject IJSRuntime _jsRuntime
+
+@attribute [Authorize]
 
 @if (IsProcessing)
 {
@@ -154,11 +158,20 @@ else
         // Calculate the order total
         Order.OrderHeader.OrderTotal = Order.OrderDetails.Sum(o => o.Price * o.Count);
 
+        var userInfo = await _localStorageService.GetItemAsync<UserDto>(Sd.Local_UserDetails);
+        if (userInfo is not null)
+        {
+            Order.OrderHeader.UserId = userInfo.Id;
+            Order.OrderHeader.Name = userInfo.Name;
+            Order.OrderHeader.Email = userInfo.Email;
+            Order.OrderHeader.PhoneNumber = userInfo.PhoneNumber;
+        }
+
         IsProcessing = false;
     }
 
     private async Task HandleCheckout()
     {
-        
+
     }
 }
