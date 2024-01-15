@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using Tangy_Business.Repository.IRepository;
 using Tangy_Models;
@@ -10,9 +11,11 @@ namespace TangyWeb_API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository _orderRepository;
-        public OrderController(IOrderRepository orderRepository)
+        private readonly IEmailSender _emailSender;
+        public OrderController(IOrderRepository orderRepository, IEmailSender emailSender)
         {
             _orderRepository = orderRepository;
+            _emailSender = emailSender;
         }
 
         // GET: api/Order
@@ -71,6 +74,10 @@ namespace TangyWeb_API.Controllers
             }
 
             var result = await _orderRepository.MarkPaymentSuccessfulAsync(orderHeaderDto.Id, sessionDetails.PaymentIntentId);
+            await _emailSender.SendEmailAsync(
+                email: orderHeaderDto.Email,
+                subject: "Tangy Order Confirmation",
+                htmlMessage: $"New order has been created with <b>Order Id : {orderHeaderDto.Id}</b>");
 
             if (result is null)
             {
