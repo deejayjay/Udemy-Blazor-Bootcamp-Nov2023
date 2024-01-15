@@ -6,6 +6,7 @@ using TangyWeb_Server.Service;
 using TangyWeb_Server.Service.IService;
 using Syncfusion.Blazor;
 using Microsoft.AspNetCore.Identity;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,9 +31,13 @@ builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductPriceRepository, ProductPriceRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
+
+// Set stripe secret key using the secret key stored securely
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 //Register Syncfusion license
 Syncfusion.Licensing.SyncfusionLicenseProvider

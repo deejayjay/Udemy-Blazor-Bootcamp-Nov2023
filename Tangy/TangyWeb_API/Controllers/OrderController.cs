@@ -70,7 +70,7 @@ namespace TangyWeb_API.Controllers
                 return BadRequest();
             }
 
-            var result = await _orderRepository.MarkPaymentSuccessfulAsync(orderHeaderDto.Id);
+            var result = await _orderRepository.MarkPaymentSuccessfulAsync(orderHeaderDto.Id, sessionDetails.PaymentIntentId);
 
             if (result is null)
             {

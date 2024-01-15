@@ -20,6 +20,40 @@ namespace Tangy_Business.Repository
             _mapper = mapper;
         }
 
+        public async Task<OrderHeaderDto> CancelOrder(int orderId)
+        {
+            var orderHeader = await _db.OrderHeaders.FindAsync(orderId);
+
+            if (orderHeader is null)
+            {
+                return new OrderHeaderDto();
+            }
+
+            if (orderHeader.Status == Sd.Status_Pending)
+            { 
+                orderHeader.Status = Sd.Status_Cancelled;
+                await _db.SaveChangesAsync();                
+            }
+
+            if (orderHeader.Status == Sd.Status_Confirmed)
+            {
+                // Refund
+                var options = new Stripe.RefundCreateOptions
+                { 
+                    Reason = Stripe.RefundReasons.RequestedByCustomer,
+                    PaymentIntent = orderHeader.PaymentIntentId
+                };
+
+                var service = new Stripe.RefundService();
+                await service.CreateAsync(options);
+                
+                orderHeader.Status = Sd.Status_Refunded;
+                await _db.SaveChangesAsync();
+            }
+
+            return _mapper.Map<OrderHeader, OrderHeaderDto>(orderHeader);
+        }
+
         public async Task<OrderDto> CreateAsync(OrderDto objDto)
         {
             try
@@ -119,7 +153,7 @@ namespace Tangy_Business.Repository
             return _mapper.Map<Order, OrderDto>(order);
         }
 
-        public async Task<OrderHeaderDto> MarkPaymentSuccessfulAsync(int id)
+        public async Task<OrderHeaderDto> MarkPaymentSuccessfulAsync(int id, string paymentIntentId)
         {
             var data = await _db.OrderHeaders.FindAsync(id);
 
@@ -130,6 +164,7 @@ namespace Tangy_Business.Repository
 
             if(data.Status == Sd.Status_Pending)
             {
+                data.PaymentIntentId = paymentIntentId;
                 data.Status = Sd.Status_Confirmed;
                 await _db.SaveChangesAsync();
                 return _mapper.Map<OrderHeader, OrderHeaderDto>(data);
@@ -145,10 +180,20 @@ namespace Tangy_Business.Repository
                 return new OrderHeaderDto();
             }
 
-            var orderHeader = _mapper.Map<OrderHeaderDto, OrderHeader>(objDto);
-            _db.OrderHeaders.Update(orderHeader);
+            var orderHeaderFromDb = await _db.OrderHeaders.FindAsync(objDto.Id);
+            orderHeaderFromDb.Name = objDto.Name;
+            orderHeaderFromDb.PhoneNumber = objDto.PhoneNumber;
+            orderHeaderFromDb.StreetAddress = objDto.StreetAddress;
+            orderHeaderFromDb.City = objDto.City;
+            orderHeaderFromDb.State = objDto.State;
+            orderHeaderFromDb.PostalCode = objDto.PostalCode;
+            orderHeaderFromDb.Status = objDto.Status;
+            orderHeaderFromDb.ShippingDate = objDto.ShippingDate;
+            orderHeaderFromDb.Carrier = objDto.Carrier;
+            orderHeaderFromDb.Tracking = objDto.Tracking;
+            
             await _db.SaveChangesAsync();
-            return _mapper.Map<OrderHeader, OrderHeaderDto>(orderHeader);
+            return _mapper.Map<OrderHeader, OrderHeaderDto>(orderHeaderFromDb);
         }
 
         public async Task<bool> UpdateOrderStatusAsync(int orderId, string status)

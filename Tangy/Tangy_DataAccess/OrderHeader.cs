@@ -47,5 +47,9 @@ namespace Tangy_DataAccess
         [Required]
         [RegularExpression(@"^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$")]
         public string PostalCode { get; set; }
+
+        public string? Tracking { get; set; }
+
+        public string? Carrier { get; set; }
     }
 }

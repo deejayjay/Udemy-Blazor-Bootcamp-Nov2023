@@ -52,5 +52,9 @@ namespace Tangy_Models
         [Display(Name = "Postal Code")]
         [RegularExpression(@"^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$")]
         public string PostalCode { get; set; }
+
+        public string? Tracking { get; set; }
+
+        public string? Carrier { get; set; }
     }
 }

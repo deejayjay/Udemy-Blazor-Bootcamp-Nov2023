@@ -159,7 +159,7 @@
             {
                 foreach (var file in e.GetMultipleFiles())
                 {
-                    var fileInfo = new FileInfo(file.Name);
+                    var fileInfo = new System.IO.FileInfo(file.Name);
                     string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
 
                     if (allowedExtensions.Any(ext => ext == fileInfo.Extension.ToLower()))
